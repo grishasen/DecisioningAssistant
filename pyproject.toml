@@ -20,9 +20,9 @@ dependencies = [
   "mlx-lm>=0.31.1",
   "mlx-vlm>=0.4.4",
   "torchvision>=0.26",
-  "turboquant-mlx-full>=0.1.2",
+  "turboquant-mlx-full>=0.3.0",
   "python-dotenv>=1.0",
-  "streamlit>=1.55.0",
+  "streamlit>=1.57.0",
   "pytest>=8.0",
   "ruff>=0.6",
 ]
