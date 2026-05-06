@@ -1,9 +1,9 @@
 # DecisioningAssistant
 
-DecisioningAssistant is a local-first MLX project for macOS that ingests PDFs and Webex threads, generates QA datasets, fine-tunes small instruction models, builds a hybrid local RAG index, and serves a Streamlit chat assistant with source-aware citations.
+DecisioningAssistant is a local-first MLX project for macOS that ingests PDFs, Markdown files, and Webex threads, generates QA datasets, fine-tunes small instruction models, builds a hybrid local RAG index, and serves a Streamlit chat assistant with source-aware citations.
 
 ## What It Does
-- Ingests PDF documentation with structure-aware paragraph chunking.
+- Ingests PDF and Markdown documentation with structure-aware paragraph chunking.
 - Fetches Webex room history directly from the Webex REST API using `rooms.json` plus a YAML config.
 - Groups Webex data into thread-based chunks so each chunk starts with the thread root.
 - Generates English QA pairs locally with an MLX-loaded model.
@@ -12,7 +12,7 @@ DecisioningAssistant is a local-first MLX project for macOS that ingests PDFs an
 - Runs a Streamlit RAG app with chat history, retrieval controls, reranking, answer selection, citations, and source popups.
 
 ## Current Pipeline Highlights
-- PDF ingestion is structure-aware: chunks are built from whole paragraphs and keep section/page metadata.
+- PDF and Markdown ingestion are structure-aware: PDFs are packed from whole paragraphs, while Markdown keeps H1 chapters whole by default and preserves section metadata.
 - Webex ingestion is thread-aware: threads with fewer than 2 messages are skipped, and each thread chunk keeps room and thread metadata.
 - Webex metadata now includes a `webexteams://...` deep link to the parent/root message in the thread.
 - Webex QA generation uses the thread start to generate the question and uses child messages as the answer.
@@ -33,6 +33,7 @@ configs/
 
 data/
   raw/pdf/
+  raw/markdown/
   raw/webex/
   staging/documents/
   staging/chunks/
@@ -81,7 +82,7 @@ model support with TorchVision image utilities, and TurboQuant conversion/runtim
 support used by the project.
 
 ## Main Configuration Files
-- `configs/sources.yaml`: PDF and Webex ingestion paths plus normalization/chunking settings.
+- `configs/sources.yaml`: PDF, Markdown, and Webex ingestion paths plus normalization/chunking settings.
 - `configs/models.yaml`: QA generator, answer model, and embedding model settings.
 - `configs/qa_generation.yaml`: QA generation, validation, split, and Webex-specific QA controls.
 - `configs/finetune.yaml`: MLX LoRA fine-tuning settings.
@@ -99,7 +100,7 @@ Named machine profiles are available alongside the defaults:
 
 ## Typical End-to-End Workflow
 1. Fetch raw Webex spaces if needed.
-2. Put PDFs into `data/raw/pdf/`.
+2. Put PDFs into `data/raw/pdf/` and Markdown files into `data/raw/markdown/`.
 3. Run ingestion and chunking.
 4. Generate QA (optional step).
 5. Fine-tune model using QA dataset from step 4 (optional).
@@ -114,7 +115,7 @@ decisioning-assistant webex-fetch \
   --config configs/webex_fetch.yaml \
   --output-dir data/raw/webex
 
-#put any pdf into pdf dir
+#put any pdf into pdf dir and markdown into markdown dir
 
 decisioning-assistant ingest #required step
 decisioning-assistant qa #optional
@@ -125,8 +126,11 @@ decisioning-assistant app --server-port 8501
 
 ## CLI Commands
 ```bash
-# Ingest PDF + Webex + normalize
+# Ingest PDF + Markdown + Webex + normalize
 decisioning-assistant ingest
+
+# Override Markdown chapter defaults for smaller chunks if needed
+decisioning-assistant ingest --markdown-target-chars 900 --markdown-split-level 6
 
 # Generate, validate, and split QA
 decisioning-assistant qa
@@ -145,6 +149,8 @@ decisioning-assistant rag-export --output-dir data/rag/export
 
 # Export only selected source types
 decisioning-assistant rag-export --output-dir data/rag/export --source pdf
+
+decisioning-assistant rag-export --output-dir data/rag/export --source markdown
 
 decisioning-assistant rag-export --output-dir data/rag/export --source webex
 

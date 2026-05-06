@@ -92,15 +92,21 @@ def _ensure_webex_thread_starts_with_root(doc: DocumentRecord, text: str) -> str
     return f"{thread_start_line}\n{normalized_text}".strip()
 
 
-def _is_prechunked_pdf(doc: DocumentRecord) -> bool:
-    """Signature: def _is_prechunked_pdf(doc: DocumentRecord) -> bool.
+def _is_prechunked_paragraph_doc(doc: DocumentRecord) -> bool:
+    """Signature: def _is_prechunked_paragraph_doc(doc: DocumentRecord) -> bool.
 
-    Return whether prechunked pdf.
+    Return whether a document was already split into paragraph-bound records.
     """
-    if doc.source_type != "pdf":
+    if doc.source_type not in {"pdf", "markdown"}:
         return False
     split_mode = str(doc.metadata.get("split_mode", "")).strip().lower()
-    return split_mode in {"chapter_paragraph", "page_paragraph", "page_fallback"}
+    return split_mode in {
+        "chapter_paragraph",
+        "page_paragraph",
+        "page_fallback",
+        "chapter_whole",
+        "section_paragraph",
+    }
 
 
 def _chunk_pdf_doc(
@@ -142,7 +148,7 @@ def _chunk_docs(
                 chunks.append(_make_chunk(doc, 0, preserved_text))
             continue
 
-        if _is_prechunked_pdf(doc):
+        if _is_prechunked_paragraph_doc(doc):
             preserved_text = doc.text.strip()
             if preserved_text:
                 chunks.append(_make_chunk(doc, 0, preserved_text))

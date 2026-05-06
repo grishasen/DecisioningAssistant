@@ -65,6 +65,17 @@ def _append_if_value(cmd: list[str], flag: str, value: str) -> None:
         cmd.extend([flag, cleaned])
 
 
+def _pick_int_value(override: int | None, cfg: dict, key: str, default: int) -> int:
+    """Pick an integer from CLI overrides or config."""
+    if override is not None:
+        return override
+
+    raw = cfg.get(key)
+    if raw is None or raw == "":
+        return default
+    return int(raw)
+
+
 def cmd_ingest(args: argparse.Namespace) -> None:
     """Signature: def cmd_ingest(args: argparse.Namespace) -> None.
 
@@ -74,11 +85,18 @@ def cmd_ingest(args: argparse.Namespace) -> None:
     cfg = _load_sources_cfg(args.sources_config, project_root)
 
     pdf_cfg = cfg.get("pdf", {}) if isinstance(cfg.get("pdf"), dict) else {}
+    markdown_cfg = cfg.get("markdown", {}) if isinstance(cfg.get("markdown"), dict) else {}
     webex_cfg = cfg.get("webex", {}) if isinstance(cfg.get("webex"), dict) else {}
 
     pdf_input = args.pdf_input_dir or str(pdf_cfg.get("input_dir", "data/raw/pdf"))
     pdf_output = args.pdf_output or str(
         pdf_cfg.get("output_jsonl", "data/staging/documents/pdf_documents.jsonl")
+    )
+    markdown_input = args.markdown_input_dir or str(
+        markdown_cfg.get("input_dir", "data/raw/markdown")
+    )
+    markdown_output = args.markdown_output or str(
+        markdown_cfg.get("output_jsonl", "data/staging/documents/markdown_documents.jsonl")
     )
     webex_input = args.webex_input_dir or str(webex_cfg.get("raw_dir", "data/raw/webex"))
     webex_output = args.webex_output or str(
@@ -88,6 +106,30 @@ def cmd_ingest(args: argparse.Namespace) -> None:
     pdf_product = _pick_metadata_value(args.pdf_product, pdf_cfg, "product")
     pdf_doc_version = _pick_metadata_value(args.pdf_doc_version, pdf_cfg, "doc_version")
     pdf_doc_type = _pick_metadata_value(args.pdf_doc_type, pdf_cfg, "doc_type")
+
+    markdown_product = _pick_metadata_value(args.markdown_product, markdown_cfg, "product")
+    markdown_doc_version = _pick_metadata_value(
+        args.markdown_doc_version, markdown_cfg, "doc_version"
+    )
+    markdown_doc_type = _pick_metadata_value(args.markdown_doc_type, markdown_cfg, "doc_type")
+    markdown_target_chars = _pick_int_value(
+        args.markdown_target_chars,
+        markdown_cfg,
+        "target_chars",
+        0,
+    )
+    markdown_min_chars = _pick_int_value(
+        args.markdown_min_chars,
+        markdown_cfg,
+        "min_chars",
+        0,
+    )
+    markdown_split_level = _pick_int_value(
+        args.markdown_split_level,
+        markdown_cfg,
+        "split_level",
+        1,
+    )
 
     webex_product = _pick_metadata_value(args.webex_product, webex_cfg, "product")
     webex_doc_version = _pick_metadata_value(args.webex_doc_version, webex_cfg, "doc_version")
@@ -108,6 +150,27 @@ def cmd_ingest(args: argparse.Namespace) -> None:
         _append_if_value(pdf_cmd, "--doc-version", pdf_doc_version)
         _append_if_value(pdf_cmd, "--doc-type", pdf_doc_type)
         _run(pdf_cmd, project_root)
+
+    if not args.skip_markdown:
+        markdown_cmd = [
+            sys.executable,
+            "-m",
+            "ingestion.ingest_markdown",
+            "--input-dir",
+            _resolve_path(markdown_input, project_root),
+            "--output",
+            _resolve_path(markdown_output, project_root),
+            "--target-chars",
+            str(markdown_target_chars),
+            "--min-chars",
+            str(markdown_min_chars),
+            "--split-level",
+            str(markdown_split_level),
+        ]
+        _append_if_value(markdown_cmd, "--product", markdown_product)
+        _append_if_value(markdown_cmd, "--doc-version", markdown_doc_version)
+        _append_if_value(markdown_cmd, "--doc-type", markdown_doc_type)
+        _run(markdown_cmd, project_root)
 
     if not args.skip_webex:
         webex_cmd = [
@@ -443,7 +506,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ingest_parser = subparsers.add_parser(
         "ingest",
-        help="Run ingestion pipeline (PDF + Webex + normalization).",
+        help="Run ingestion pipeline (PDF + Markdown + Webex + normalization).",
     )
     ingest_parser.add_argument("--sources-config", default="configs/sources.yaml")
     ingest_parser.add_argument("--pdf-input-dir", default="")
@@ -451,12 +514,21 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_parser.add_argument("--pdf-product", default="")
     ingest_parser.add_argument("--pdf-doc-version", default="")
     ingest_parser.add_argument("--pdf-doc-type", default="")
+    ingest_parser.add_argument("--markdown-input-dir", default="")
+    ingest_parser.add_argument("--markdown-output", default="")
+    ingest_parser.add_argument("--markdown-product", default="")
+    ingest_parser.add_argument("--markdown-doc-version", default="")
+    ingest_parser.add_argument("--markdown-doc-type", default="")
+    ingest_parser.add_argument("--markdown-target-chars", type=int, default=None)
+    ingest_parser.add_argument("--markdown-min-chars", type=int, default=None)
+    ingest_parser.add_argument("--markdown-split-level", type=int, default=None)
     ingest_parser.add_argument("--webex-input-dir", default="")
     ingest_parser.add_argument("--webex-output", default="")
     ingest_parser.add_argument("--webex-product", default="")
     ingest_parser.add_argument("--webex-doc-version", default="")
     ingest_parser.add_argument("--webex-doc-type", default="")
     ingest_parser.add_argument("--skip-pdf", action="store_true")
+    ingest_parser.add_argument("--skip-markdown", action="store_true")
     ingest_parser.add_argument("--skip-webex", action="store_true")
     ingest_parser.add_argument("--skip-normalize", action="store_true")
     ingest_parser.set_defaults(func=cmd_ingest)
@@ -545,7 +617,7 @@ def build_parser() -> argparse.ArgumentParser:
     rag_export_parser.add_argument(
         "--source",
         action="append",
-        choices=["pdf", "webex"],
+        choices=["pdf", "markdown", "webex"],
         default=[],
         help="Export only selected source type(s). Repeat for multiple values.",
     )

@@ -360,6 +360,8 @@ def _infer_source_type(row: dict[str, Any]) -> str:
     source_ref = str(row.get("source_ref") or "").strip().lower()
     if source_ref.startswith("pdf::"):
         return "pdf"
+    if source_ref.startswith("markdown::"):
+        return "markdown"
     if source_ref.startswith("webex::"):
         return "webex"
     return "unknown"
@@ -467,6 +469,18 @@ def _format_source_line(row: dict[str, Any]) -> str:
         return (
             f"- PDF: `{title}` | chapter: `{section}` | page: `{page}` ({score_text})"
         )
+
+    if source_type == "markdown":
+        title = str(
+            metadata.get("markdown_title")
+            or metadata.get("title")
+            or metadata.get("file_name")
+            or "unknown"
+        )
+        section = str(
+            metadata.get("section_title") or metadata.get("active_heading") or "unknown"
+        )
+        return f"- Markdown: `{title}` | section: `{section}` ({score_text})"
 
     if source_type == "webex":
         room_title = str(

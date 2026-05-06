@@ -39,9 +39,12 @@ def parse_args() -> argparse.Namespace:
         "--source",
         dest="sources",
         action="append",
-        choices=("pdf", "webex"),
+        choices=("pdf", "markdown", "webex"),
         default=[],
-        help="Optional source-type filter. Repeat for multiple values (e.g. --source pdf --source webex).",
+        help=(
+            "Optional source-type filter. Repeat for multiple values "
+            "(e.g. --source pdf --source markdown --source webex)."
+        ),
     )
     return parser.parse_args()
 

@@ -92,6 +92,8 @@ def _row_source_type(row: dict[str, Any]) -> str:
     source_ref = str(row.get("source_ref") or "").strip().lower()
     if source_ref.startswith("webex::"):
         return "webex"
+    if source_ref.startswith("markdown::"):
+        return "markdown"
     if source_ref.startswith("pdf::"):
         return "pdf"
     return ""

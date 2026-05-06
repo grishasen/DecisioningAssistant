@@ -245,10 +245,16 @@ def _build_chunk_prefix_lines(
     metadata = chunk.metadata if isinstance(chunk.metadata, dict) else {}
     source_type = str(chunk.source_type or "").strip().lower()
 
-    if source_type == "pdf" and cfg.contextualize_pdf_chunks:
+    if source_type in {"pdf", "markdown"} and cfg.contextualize_pdf_chunks:
         pages = _page_span(metadata)
+        document_title = (
+            metadata.get("pdf_title")
+            or metadata.get("markdown_title")
+            or metadata.get("title")
+            or metadata.get("file_name")
+        )
         return [
-            f"Document: {_clean_metadata_text(metadata.get('pdf_title') or metadata.get('title') or metadata.get('file_name'))}",
+            f"Document: {_clean_metadata_text(document_title)}",
             f"Product: {_clean_metadata_text(metadata.get('product'))}",
             f"Version: {_clean_metadata_text(metadata.get('doc_version'))}",
             f"Type: {_clean_metadata_text(metadata.get('doc_type'))}",
@@ -310,11 +316,16 @@ def _build_qa_prefix_lines(
         f"Question: {_clean_metadata_text(qa.question)}",
     ]
 
-    if source_type == "pdf":
+    if source_type in {"pdf", "markdown"}:
         pages = _page_span(qa_metadata)
+        document_title = (
+            qa_metadata.get("pdf_title")
+            or qa_metadata.get("markdown_title")
+            or qa_metadata.get("title")
+        )
         lines.extend(
             [
-                f"Document: {_clean_metadata_text(qa_metadata.get('pdf_title') or qa_metadata.get('title'))}",
+                f"Document: {_clean_metadata_text(document_title)}",
                 f"Product: {_clean_metadata_text(qa_metadata.get('product'))}",
                 f"Version: {_clean_metadata_text(qa_metadata.get('doc_version'))}",
                 f"Type: {_clean_metadata_text(qa_metadata.get('doc_type'))}",

@@ -7,6 +7,19 @@ pdf:
   doc_version: ""
   doc_type: guide
 
+markdown:
+  input_dir: data/raw/markdown
+  output_jsonl: data/staging/documents/markdown_documents.jsonl
+  # Keep H1 chapters as whole records by default. Set target_chars > 0 and
+  # split_level up to 6 for smaller heading/paragraph chunks.
+  target_chars: 0
+  min_chars: 0
+  split_level: 1
+  # Canonical metadata defaults
+  product: ""
+  doc_version: ""
+  doc_type: guide
+
 webex:
   raw_dir: data/raw/webex
   output_jsonl: data/staging/documents/webex_documents.jsonl
@@ -19,6 +32,7 @@ webex:
 normalize:
   inputs:
     - data/staging/documents/pdf_documents.jsonl
+    - data/staging/documents/markdown_documents.jsonl
     - data/staging/documents/webex_documents.jsonl
   output_documents: data/staging/documents/documents.jsonl
   output_chunks: data/staging/chunks/chunks.jsonl
