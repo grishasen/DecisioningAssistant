@@ -1358,7 +1358,7 @@ def main() -> None:
                         f"relevance={float(candidate.get('relevance_score') or 0.0):.4f}, "
                         f"support={float(candidate.get('support_score') or 0.0):.4f}"
                     )
-                    st.text(str(candidate.get("answer") or ""))
+                    st.markdown(str(candidate.get("answer") or ""))
         if selected_rows:
             with st.expander("Sources"):
                 for idx, row in enumerate(selected_rows, start=1):
