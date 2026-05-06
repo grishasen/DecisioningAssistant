@@ -1,0 +1,30 @@
+# Generation profile for Apple Silicon M5 Pro with 64 GB unified memory.
+#
+# This profile favors answer quality while leaving headroom for the embedding
+# model, cross-encoder reranker, Streamlit, and a larger KV cache.
+#
+# Alternate answer model for maximum quality/headroom testing:
+#   mlx-community/Qwen3-30B-A3B-Instruct-2507-8bit
+# The 8-bit variant is roughly 32 GB, so use it only if interactive latency and
+# memory pressure are acceptable on your machine.
+
+qa_generator:
+  provider: mlx
+  model: mlx-community/Qwen3-30B-A3B-Instruct-2507-8bit
+  max_tokens: 2048
+  temperature: 0.10
+  trust_remote_code: true
+
+answer_model:
+  provider: mlx
+  model: mlx-community/Qwen3-30B-A3B-Instruct-2507-8bit
+  #adapter_path: data/models/Qwen3-30B-A3B-Instruct-2507-4bit-lora
+  max_tokens: 2048
+  temperature: 0.15
+  trust_remote_code: true
+
+embeddings:
+  # Keep this in sync with configs/rag.m5_pro_64gb.yaml.
+  model_name: BAAI/bge-large-en-v1.5
+  normalize_embeddings: true
+

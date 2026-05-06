@@ -1,0 +1,69 @@
+# RAG profile for Apple Silicon M3 with 24 GB unified memory.
+#
+# This is the explicit named version of the original baseline tuned for the
+# smaller-memory laptop profile.
+
+prompt_mode: grounded
+
+chunks_path: data/staging/chunks/chunks.jsonl
+include_qa: true
+qa_path: data/qa_m3_24gb/qa_clean.jsonl
+qa_text_mode: question_answer
+max_qa_answer_chars: 1400
+
+qdrant_path: data/rag/vectordb_m3_24gb
+collection_name: docs_m3_24gb
+embedding_model: BAAI/bge-base-en-v1.5
+normalize_embeddings: true
+
+contextualize_index_text: true
+contextual_index_max_prefix_chars: 320
+contextualize_pdf_chunks: true
+contextualize_webex_chunks: true
+contextualize_qa_pairs: true
+
+top_k: 8
+top_k_min: 1
+top_k_max: 100
+
+fetch_k: 30
+score_threshold: 0.12
+rerank_mode: cross_encoder
+reranker_model: BAAI/bge-reranker-v2-m3
+rerank_alpha: 0.65
+qa_pair_score_boost: 0.03
+max_per_source: 3
+
+webex_recency_enabled: true
+webex_recency_field: created_at
+webex_recency_half_life_days: 90
+webex_recency_max_bonus: 0.04
+webex_recency_apply_to_qa_pairs: true
+webex_recency_query_adaptive: true
+webex_recency_recent_half_life_days: 30
+webex_recency_recent_max_bonus: 0.10
+
+answer_sample_count: 4
+answer_sample_count_min: 1
+answer_sample_count_max: 12
+answer_rerank_mode: cross_encoder
+answer_rerank_alpha: 0.7
+answer_rerank_support_top_k: 3
+
+max_context_chunks: 6
+max_context_chunks_min: 1
+max_context_chunks_max: 50
+
+max_history_turns: 8
+max_history_chars: 6000
+max_chunk_chars: 2400
+max_total_context_chars: 9000
+max_prompt_chars: 18000
+
+max_history_tokens: 1200
+max_chunk_tokens: 700
+max_total_context_tokens: 2600
+max_prompt_tokens: 5000
+
+index_batch_size: 128
+

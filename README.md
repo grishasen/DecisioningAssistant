@@ -88,7 +88,10 @@ support used by the project.
 - `configs/rag.yaml`: indexing, retrieval, reranking, answer selection, and prompt-budget settings.
 - `configs/webex_fetch.yaml`: direct Webex API fetch settings.
 
-Larger machine profiles are available alongside the defaults:
+Named machine profiles are available alongside the defaults:
+- `configs/models.m3_24gb.yaml`: explicit M3 24 GB MLX-LM generation profile.
+- `configs/rag.m3_24gb.yaml`: explicit M3 24 GB retrieval/context profile.
+- `configs/qa_generation.m3_24gb.yaml`: explicit M3 24 GB QA generation profile.
 - `configs/models.m5_pro_64gb.yaml`: larger MLX-LM generation profile.
 - `configs/models.m5_pro_64gb.gemma4.yaml`: Gemma 4 MLX-VLM generation profile.
 - `configs/rag.m5_pro_64gb.yaml`: larger retrieval/context profile.

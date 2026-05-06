@@ -1,0 +1,25 @@
+# Generation profile for Apple Silicon M3 with 24 GB unified memory.
+#
+# This matches the original project baseline as explicit named profile files so
+# it can coexist with the M5 and Gemma 4 profiles.
+
+qa_generator:
+  provider: mlx
+  model: mlx-community/DeepHermes-3-Llama-3-8B-Preview-bf16
+  max_tokens: 1024
+  temperature: 0.15
+  trust_remote_code: true
+
+answer_model:
+  provider: mlx
+  model: mlx-community/DeepHermes-3-Llama-3-8B-Preview-bf16
+  #adapter_path: data/models/DeepHermes-3-Llama-3-8B-Preview-bf16-lora-gs
+  max_tokens: 1024
+  temperature: 0.15
+  trust_remote_code: true
+
+embeddings:
+  # Keep this in sync with configs/rag.m3_24gb.yaml.
+  model_name: BAAI/bge-base-en-v1.5
+  normalize_embeddings: true
+

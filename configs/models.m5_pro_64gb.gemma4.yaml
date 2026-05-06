@@ -1,0 +1,37 @@
+# Gemma 4 generation profile for Apple Silicon M5 Pro with 64 GB unified memory.
+#
+# Gemma 4 MLX conversions are VLM/omni models, so this profile uses the
+# `mlx_vlm` provider. Install support with:
+#   pip install -e .[vlm]
+#
+# Useful Gemma 4 MLX family choices:
+# - mlx-community/gemma-4-e2b-it-mxfp4          # fastest, small-device style
+# - mlx-community/gemma-4-e4b-it-mxfp4          # fast QA generation / low latency
+# - mlx-community/gemma-4-26b-a4b-it-mxfp4      # recommended balanced M5 profile
+# - mlx-community/gemma-4-31b-it-mxfp4          # highest-quality 4-bit profile
+# - mlx-community/gemma-4-31b-it-8bit           # quality experiment; much heavier
+#
+# The 26B A4B model is MoE-like: total size is larger, but active parameters
+# are much lower, making it a good quality/latency starting point.
+
+qa_generator:
+  provider: mlx_vlm
+  model: mlx-community/gemma-4-31b-it-bf16
+  max_tokens: 2048
+  temperature: 0.10
+  trust_remote_code: true
+
+answer_model:
+  provider: mlx_vlm
+  model: mlx-community/gemma-4-31b-it-bf16
+  # For maximum answer quality on 64 GB, try:
+  # model: mlx-community/gemma-4-31b-it-mxfp4
+  max_tokens: 2048
+  temperature: 0.15
+  trust_remote_code: true
+
+embeddings:
+  # Keep this in sync with configs/rag.m5_pro_64gb.yaml.
+  model_name: BAAI/bge-large-en-v1.5
+  normalize_embeddings: true
+

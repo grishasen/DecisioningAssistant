@@ -1,0 +1,22 @@
+input_chunks: data/staging/chunks/chunks.jsonl
+output_raw_qa: data/qa_m3_24gb/qa_raw.jsonl
+output_clean_qa: data/qa_m3_24gb/qa_clean.jsonl
+output_split_dir: data/qa_m3_24gb
+
+resume_generation: true
+qa_progress_path: data/qa_m3_24gb/qa_progress.jsonl
+
+qa_per_chunk: 1
+max_chunks: 0
+min_question_chars: 20
+min_answer_chars: 120
+max_answer_chars: 2400
+min_webex_chunk_chars: 200
+webex_user_name: ""
+max_webex_thread_answer_chars: 3200
+
+train_ratio: 0.9
+valid_ratio: 0.08
+test_ratio: 0.02
+seed: 42
+

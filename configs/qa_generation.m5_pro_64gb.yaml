@@ -1,0 +1,24 @@
+input_chunks: data/staging/chunks/chunks.jsonl
+output_raw_qa: data/qa_m5/qa_raw.jsonl
+output_clean_qa: data/qa_m5/qa_clean.jsonl
+output_split_dir: data/qa_m5
+
+resume_generation: true
+qa_progress_path: data/qa_m5/qa_progress.jsonl
+
+# Denser QA supervision for the larger retrieval profile and possible reranker
+# fine-tuning/hard-negative mining later.
+qa_per_chunk: 2
+max_chunks: 0
+min_question_chars: 20
+min_answer_chars: 120
+max_answer_chars: 3600
+min_webex_chunk_chars: 200
+webex_user_name: ""
+max_webex_thread_answer_chars: 5000
+
+train_ratio: 0.9
+valid_ratio: 0.08
+test_ratio: 0.02
+seed: 42
+
