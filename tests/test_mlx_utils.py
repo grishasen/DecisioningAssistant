@@ -12,17 +12,20 @@ from common.mlx_utils import (
 
 
 def test_normalize_mlx_provider_accepts_turboquant_aliases() -> None:
+    """Verify TurboQuant provider aliases normalize to the canonical backend name."""
     assert normalize_mlx_provider("turboquant") == "turboquant_mlx"
     assert normalize_mlx_provider("turboquant-mlx") == "turboquant_mlx"
     assert normalize_mlx_provider("tq") == "turboquant_mlx"
 
 
 def test_normalize_mlx_provider_rejects_unknown_provider() -> None:
+    """Verify unsupported MLX provider names raise a clear validation error."""
     with pytest.raises(ValueError, match="provider must be one of"):
         normalize_mlx_provider("not-a-provider")
 
 
 def test_mlx_generation_options_from_config_parses_turboquant_keys() -> None:
+    """Verify TurboQuant-specific config keys are parsed into typed generation options."""
     options = mlx_generation_options_from_config(
         {
             "turboquant_fast": True,
@@ -43,6 +46,7 @@ def test_mlx_generation_options_from_config_parses_turboquant_keys() -> None:
 
 
 def test_mlx_generation_options_from_config_accepts_generic_kv_aliases() -> None:
+    """Verify generic KV-cache aliases map to TurboQuant generation options."""
     options = mlx_generation_options_from_config(
         {
             "kv_bits": 4,
@@ -59,22 +63,26 @@ def test_mlx_generation_options_from_config_accepts_generic_kv_aliases() -> None
 
 
 def test_mlx_generation_options_from_config_parses_false_string() -> None:
+    """Verify string false values disable boolean TurboQuant options."""
     options = mlx_generation_options_from_config({"turboquant_fast": "false"})
 
     assert options["turboquant_fast"] is False
 
 
 def test_threaded_generator_runs_generation_on_loader_thread() -> None:
+    """Verify threaded generation runs on the same worker thread that loaded the model."""
     main_thread_id = threading.get_ident()
     init_thread_ids: list[int] = []
     generate_thread_ids: list[int] = []
 
     class FakeGenerator:
         def generate(self, prompt: str, **kwargs: object) -> str:
+            """Record the active thread and echo the prompt with generation kwargs."""
             generate_thread_ids.append(threading.get_ident())
             return f"{prompt}:{kwargs['max_tokens']}"
 
     def factory() -> FakeGenerator:
+        """Record the loader thread and return a fake generator instance."""
         init_thread_ids.append(threading.get_ident())
         return FakeGenerator()
 
@@ -90,8 +98,10 @@ def test_threaded_generator_runs_generation_on_loader_thread() -> None:
 
 
 def test_threaded_generator_propagates_generation_errors() -> None:
+    """Verify generation exceptions raised on the worker thread reach the caller."""
     class FakeGenerator:
         def generate(self, prompt: str) -> str:
+            """Raise a prompt-specific error to exercise worker exception propagation."""
             raise ValueError(f"bad prompt: {prompt}")
 
     generator = MLXThreadedGenerator(FakeGenerator)

@@ -87,6 +87,7 @@ def _split_sections(
     in_fence = False
 
     def flush() -> None:
+        """Append the buffered section content and reset the section line buffer."""
         nonlocal current_lines
         content = "\n".join(current_lines).strip()
         if content:
@@ -154,6 +155,7 @@ def _markdown_paragraphs(section: MarkdownSection) -> list[str]:
     in_fence = False
 
     def flush() -> None:
+        """Append the buffered paragraph text and reset the paragraph line buffer."""
         nonlocal current
         text = "\n".join(current).strip()
         if text:

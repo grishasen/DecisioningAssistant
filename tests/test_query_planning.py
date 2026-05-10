@@ -9,6 +9,7 @@ class DummyGenerator:
     """Return a fixed rewrite for query planning tests."""
 
     def __init__(self, value: str) -> None:
+        """Store the fixed rewrite value and initialize call tracking."""
         self.value = value
         self.calls = 0
 

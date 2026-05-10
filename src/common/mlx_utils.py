@@ -138,6 +138,7 @@ def _make_min_tokens_logits_processor(
         return None
 
     def processor(tokens: Any, logits: Any) -> Any:
+        """Mask EOS logits until the generated token count reaches the minimum."""
         if tokens.size < min_tokens:
             import mlx.core as mx
 
@@ -293,6 +294,7 @@ class MLXLoadedGenerator:
         )
 
     def _turboquant_logits_processors(self) -> list[Callable[[Any, Any], Any]] | None:
+        """Return TurboQuant logits processors needed for configured generation constraints."""
         processor = _make_min_tokens_logits_processor(
             self._turboquant_min_tokens,
             _eos_token_ids(self._tokenizer),
@@ -472,6 +474,7 @@ class MLXThreadedGenerator:
     """
 
     def __init__(self, factory: Callable[[], Any]) -> None:
+        """Start the worker thread and initialize the generator from the factory."""
         self._factory = factory
         self._tasks: Queue[Any] = Queue()
         self._ready = threading.Event()
@@ -488,6 +491,7 @@ class MLXThreadedGenerator:
             raise RuntimeError("Failed to initialize MLX generator worker") from self._init_error
 
     def _run(self) -> None:
+        """Own the generator instance and process queued generation tasks until stopped."""
         try:
             self._generator = self._factory()
         except BaseException as exc:  # noqa: BLE001

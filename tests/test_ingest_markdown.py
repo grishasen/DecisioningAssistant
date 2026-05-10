@@ -7,6 +7,7 @@ from ingestion.normalize_docs import _chunk_docs
 
 
 def test_extract_markdown_records_uses_heading_sections(tmp_path: Path) -> None:
+    """Verify Markdown ingestion emits records with heading paths and fenced code intact."""
     markdown_path = tmp_path / "guide.md"
     markdown_path.write_text(
         """---
@@ -50,6 +51,7 @@ value = 1
 
 
 def test_extract_markdown_records_keeps_h1_chapter_whole_by_default(tmp_path: Path) -> None:
+    """Verify default Markdown splitting preserves each H1 chapter as one record."""
     markdown_path = tmp_path / "guide.md"
     markdown_path.write_text(
         """# Chapter One
@@ -77,6 +79,7 @@ Third paragraph.
 
 
 def test_markdown_prechunked_records_are_preserved(tmp_path: Path) -> None:
+    """Verify prechunked Markdown records are not split again by normalization."""
     markdown_path = tmp_path / "guide.md"
     markdown_path.write_text(
         "# Guide\n\nFirst paragraph.\n\nSecond paragraph.\n",
